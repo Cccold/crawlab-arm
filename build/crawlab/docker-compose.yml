@@ -1,0 +1,14 @@
+version: '3.3'
+services:
+  master:
+    image: crawlab:v6
+    container_name: crawlabv6
+    environment:
+      CRAWLAB_NODE_MASTER: "Y"
+      CRAWLAB_MONGO_HOST: "mongo"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:4.2

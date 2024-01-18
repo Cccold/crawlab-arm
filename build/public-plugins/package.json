@@ -1,0 +1,23 @@
+{
+  "name": "public-plugins",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Repo for Crawlab plugins",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/crawlab-team/public-plugins.git"
+  },
+  "author": "Marvin Zhang",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/crawlab-team/crawlab-docs/issues"
+  },
+  "homepage": "https://github.com/crawlab-team/crawlab-docs#readme",
+  "devDependencies": {
+    "axios": "^0.27.2",
+    "chalk": "^4.1.2",
+    "dotenv": "^16.0.1",
+    "qiniu": "^7.4.0",
+    "walk-sync": "^3.0.0"
+  }
+}

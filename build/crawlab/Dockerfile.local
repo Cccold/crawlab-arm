@@ -1,0 +1,76 @@
+FROM golang:latest AS backend-build
+
+WORKDIR /go/src/app
+COPY ./backend .
+
+ENV GO111MODULE on
+ENV GOPROXY https://goproxy.cn
+
+RUN go mod tidy \
+  && go install -v ./...
+
+
+FROM node:12-alpine AS frontend-build
+
+ADD ./frontend /app
+WORKDIR /app
+
+RUN apk add --no-cache python2 make g++
+RUN yarn config set registry https://registry.yarnpkg.com &&\
+	yarn install && yarn run build:docker
+
+
+# images
+FROM ubuntu:20.04
+
+# set as non-interactive
+ENV DEBIAN_FRONTEND noninteractive
+
+# set CRAWLAB_IS_DOCKER
+ENV CRAWLAB_IS_DOCKER Y
+
+# install packages
+RUN chmod 777 /tmp \
+    && sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list \
+	&& apt-get update \
+	&& apt-get install -y curl git net-tools iputils-ping ntp ntpdate python3 python3-pip nginx wget dumb-init\
+	&& ln -s /usr/bin/pip3 /usr/local/bin/pip \
+	&& ln -s /usr/bin/python3 /usr/local/bin/python
+
+WORKDIR /app
+# add files
+COPY ./backend/conf /app/backend/conf
+COPY ./nginx /app/nginx
+COPY ./bin/docker-init.sh /app/bin
+
+# copy backend files
+RUN mkdir -p /opt/bin
+COPY --from=backend-build /go/bin/crawlab /opt/bin
+RUN cp /opt/bin/crawlab /usr/local/bin/crawlab-server
+
+
+# copy frontend files
+COPY --from=frontend-build /app/dist /app/dist
+
+COPY ./nginx/crawlab.conf /etc/nginx/conf.d
+# working directory
+WORKDIR /app/backend
+
+# timezone environment
+ENV TZ Asia/Shanghai
+
+# language environment
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+
+# frontend port
+EXPOSE 8081
+
+# backend port
+EXPOSE 9666
+
+# start backend
+# CMD ["ls -a"]
+# CMD ["/bin/bash", "ls /"]
+
+

@@ -1,0 +1,36 @@
+# version: '3.3'
+# services:
+#   master:
+#     image: crawlabv6
+#     container_name: crawlabv6
+#     restart: always
+#     environment:
+#       CRAWLAB_NODE_MASTER: "Y"  # Y: 主节点
+#       CRAWLAB_MONGO_HOST: "172.31.18.84"  # mongo host address. 在 Docker-Compose 网络中，直接引用 service 名称
+#       CRAWLAB_MONGO_PORT: "27017"  # mongo port 
+#       CRAWLAB_MONGO_DB: "crawlabv6"  # mongo database 
+#       CRAWLAB_MONGO_USERNAME: "root"  # mongo username
+#       CRAWLAB_MONGO_PASSWORD: "gongzitingdb"  # mongo password 
+#       CRAWLAB_MONGO_AUTHSOURCE: "admin"  # mongo auth source 
+#     volumes:
+#       - "/home/ec2-user/crawlab_date/spiders:/app/spiders"  # 挂载爬虫文件
+#     ports:
+#       - "8081:8080"  # webui
+#       - "9666:9666"  # 开放 grpc 端口
+# # 先到build/crawlab 下build crawlabv6镜像 
+
+
+
+# 以下为工作节点部署
+    version: '3.3'
+    services:
+      worker:
+        image: crawlab:v6
+        container_name: crawlabv6
+        restart: always
+        environment:
+          CRAWLAB_NODE_MASTER: "N"  # N: 工作节点
+          CRAWLAB_GRPC_ADDRESS: "172.31.18.107:9666"  # 主节点ip
+          CRAWLAB_FS_FILER_URL: "http://172.31.18.107:18081/api/filer"  # seaweedfs api
+        volumes:
+          - "/home/ec2-user/crawlab_date/app/spiders:/app/spiders"  # 挂载爬虫文件
